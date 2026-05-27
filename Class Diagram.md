@@ -30,6 +30,8 @@ classDiagram
     }
 
     class 전투 {
+	- 플레이어매니저 : 플레이어
+	- 현재 캐릭터 : 캐릭터
         + 캐릭터생성(플레이어id: String, 캐릭터명: String, 직업: String, 레벨: int)  void
         + 몬스터공격(플레이어id: String)  void
     }
