@@ -30,7 +30,6 @@
 </div>
 
 <%
-    // POST 요청 시 캐릭터 생성 및 결과 출력 제어
     request.setCharacterEncoding("UTF-8");
     if ("POST".equalsIgnoreCase(request.getMethod()) && "create".equals(request.getParameter("action"))) {
         String playerId = request.getParameter("playerId");
@@ -39,10 +38,13 @@
         int level = Integer.parseInt(request.getParameter("level"));
 
         전투 전투시스템 = new 전투();
-        캐릭터 생성된캐릭터 = 전투시스템.캐릭터생성(playerId, charName, job, level);
-
-        if (생성된캐릭터 != null) {
-            // 생성 완료된 객체를 세션에 저장하여 전투 UI에서 쓸 수 있도록 함
+        
+        // [리팩토링 핵심]: 클래스 다이어그램의 void 반환 설계에 맞추어 호출
+        전투시스템.캐릭터생성(playerId, charName, job, level);
+        
+        캐릭터 생성된캐릭터 = 전투시스템.get생성된캐릭터();
+        
+        if (전투시스템.is인증성공() && 생성된캐릭터 != null) {
             session.setAttribute("myCharacter", 생성된캐릭터);
 %>
             <div class="result">

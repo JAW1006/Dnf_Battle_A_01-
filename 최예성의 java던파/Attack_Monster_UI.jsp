@@ -39,13 +39,16 @@
     if ("POST".equalsIgnoreCase(request.getMethod()) && "attack".equals(request.getParameter("action")) && 나의캐릭터 != null) {
         String playerId = request.getParameter("playerId");
         
+        // [리팩토링 핵심]: 비즈니스 로직 제어권을 UI에서 Controller로 이관 (MVC 규칙 준수)
         전투 전투시스템 = new 전투();
+        전투시스템.set현재캐릭터(나의캐릭터); // 현재 캐릭터 위임
         
-        // 1. 유효성 검사 (플레이어체크 포함 관계 수행)
-        if (전투시스템.플레이어체크(playerId)) {
-            // 2. 스킬 발동 및 데미지 계산 (다형성 작동)
-            float 데미지 = 나의캐릭터.스킬발동();
-            String 등급 = 전투시스템.공격등급판정(데미지);
+        // 순차도_몬스터공격 2번인 '몬스터공격(id)' 단일 메서드만 호출하여 제어
+        전투시스템.몬스터공격(playerId);
+        
+        if (전투시스템.is인증성공()) {
+            float 데미지 = 전투시스템.get최종데미지();
+            String 등급 = 전투시스템.get공격등급();
 %>
             <div class="result">
                 <h3>💥 공격 결과 출력</h3>
