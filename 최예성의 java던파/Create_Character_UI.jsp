@@ -37,14 +37,17 @@
         String job = request.getParameter("job");
         int level = Integer.parseInt(request.getParameter("level"));
 
+        // 오타 수정: '전환'을 '전투' 클래스로 올바르게 생성
         전투 전투시스템 = new 전투();
         
-        // [리팩토링 핵심]: 클래스 다이어그램의 void 반환 설계에 맞추어 호출
-        전투시스템.캐릭터생성(playerId, charName, job, level);
+        // 다이어그램 void 스펙을 준수하며 비즈니스 로직 요청
+        전투시스템.캐릭터생성(playerId, charName, job, level, request);
         
-        캐릭터 생성된캐릭터 = 전투시스템.get생성된캐릭터();
+        // request 컨텍스트에 공유된 결과 객체 획득
+        캐릭터 생성된캐릭터 = (캐릭터) request.getAttribute("생성된캐릭터");
         
-        if (전투시스템.is인증성공() && 생성된캐릭터 != null) {
+        if (생성된캐릭터 != null) {
+            // 다른 페이지(공격 UI)에서 공유할 수 있도록 session에 바인딩
             session.setAttribute("myCharacter", 생성된캐릭터);
 %>
             <div class="result">
