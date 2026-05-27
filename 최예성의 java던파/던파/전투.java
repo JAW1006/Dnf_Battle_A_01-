@@ -1,55 +1,37 @@
 package 던파;
 
-import javax.servlet.http.HttpServletRequest;
-
 public class 전투 {
     private 플레이어 플레이어매니저 = new 플레이어();
+    private 캐릭터 현재캐릭터; // 클래스 내부에 캐릭터를 보관할 필드 추가
 
-    // 다이어그램 스펙: void 반환형 100% 일치
+    // 다이어그램 원형 그대로 유지 (void 반환형, 순수 파라미터)
     public void 캐릭터생성(String 플레이어id, String 캐릭터명, String 직업, int 레벨) {
-        // 다이어그램 구조 유지를 위한 기본 메서드
-    }
-
-    // 웹(JSP) 연동을 위해 웹 컨텍스트(request)를 함께 받는 실제 처리 메서드 (오버로딩)
-    public void 캐릭터생성(String 플레이어id, String 캐릭터명, String 직업, int 레벨, HttpServletRequest request) {
-        // 1. 플레이어 체크 (순차도 3번: 플레이어체크)
+        // 1. 플레이어 체크 (순차도 요구사항)
         if (!플레이어매니저.플레이어체크(플레이어id)) {
-            return; // 인증 실패 시 request에 아무것도 담기지 않음
+            this.현재캐릭터 = null;
+            return; 
         }
 
-        // 2. 직업에 따른 동적 객체 생성 (순차도 alt 분기 및 다형성)
-        캐릭터 생성된캐릭터 = null;
+        // 2. 직업에 따른 동적 객체 생성 후 멤버 변수에 저장 (다형성)
         if ("전사".equals(직업)) {
-            생성된캐릭터 = new 전사(캐릭터명, 레벨);
+            this.현재캐릭터 = new 전사(캐릭터명, 레벨);
         } else if ("마법사".equals(직업)) {
-            생성된캐릭터 = new 마법사(캐릭터명, 레벨);
-        }
-
-        // 클래스 내부 필드를 오염시키지 않고, request 영역을 통해 UI로 객체 전달
-        if (생성된캐릭터 != null) {
-            request.setAttribute("생성된캐릭터", 생성된캐릭터);
+            this.현재캐릭터 = new 마법사(캐릭터명, 레벨);
         }
     }
 
-    // 다이어그램 스펙: void 반환형 100% 일치
+    // 다이어그램 원형 그대로 유지 (void 반환형, 플레이어id만 받음)
     public void 몬스터공격(String 플레이어id) {
-        // 다이어그램 구조 유지를 위한 기본 메서드
-    }
-
-    // 웹(JSP) 연동을 위한 실제 처리 메서드 (오버로딩)
-    public void 몬스터공격(String 플레이어id, 캐릭터 현재캐릭터, HttpServletRequest request) {
-        // 1. 플레이어 체크 (순차도 3번)
+        // 1. 플레이어 체크
         if (!플레이어매니저.플레이어체크(플레이어id)) {
-            request.setAttribute("인증성공", false);
             return;
         }
-        request.setAttribute("인증성공", true);
 
-        // 2. 캐릭터 스킬 발동 (순차도 6번: 다형성 스킬발동)
-        if (현재캐릭터 != null) {
-            float 데미지 = 현재캐릭터.스킬발동();
+        // 2. 내부에 저장된 캐릭터가 있다면 스킬 발동 (UI가 직접 호출하던 로직을 컨트롤러 내부로 완전히 흡수)
+        if (this.현재캐릭터 != null) {
+            float 데미지 = this.현재캐릭터.스킬발동();
             
-            // 3. 등급 처리 로직 (순차도 alt 분기구문)
+            // 등급 판정 로직
             String 등급;
             if (데미지 >= 200) {
                 등급 = "S급 공격";
@@ -59,9 +41,13 @@ public class 전투 {
                 등급 = "B급 공격";
             }
 
-            // 결과를 request에 바인딩하여 UI로 전달
-            request.setAttribute("최종데미지", 데미지);
-            request.setAttribute("공격등급", 등급);
+            // 실시간 콘솔 출력 혹은 필요 시 주석 처리 가능합니다.
+            System.out.println("데미지: " + 데미지 + " / 등급: " + 등급);
         }
+    }
+
+    // JSP(UI) 영역에서 캐릭터 정보를 출력하거나 세션에 넘겨주기 위한 필수 Getter
+    public 캐릭터 get현재캐릭터() {
+        return this.현재캐릭터;
     }
 }
