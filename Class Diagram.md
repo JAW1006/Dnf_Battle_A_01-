@@ -31,7 +31,7 @@ classDiagram
 
     class 전투 {
         + 캐릭터생성(플레이어id: String, 캐릭터명: String, 직업: String, 레벨: int)  void
-        + 몬스터공격(플레이어id: String)  void
+        + 몬스터공격(플레이어id: String, 현재캐릭터:캐릭터, request: HttpServletRequest)  void
     }
 
     전사 --|> 캐릭터
