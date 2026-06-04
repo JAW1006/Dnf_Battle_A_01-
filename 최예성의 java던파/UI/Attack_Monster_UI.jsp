@@ -16,7 +16,6 @@
 <div class="box">
     <h2>몬스터 공격 시스템</h2>
     <%
-        // 세션에서 기존에 생성된 전투 시스템 인스턴스 획득
         전투 전투시스템 = (전투) session.getAttribute("battleSystem");
         캐릭터 나의캐릭터 = (전투시스템 != null) ? 전투시스템.get현재캐릭터() : null;
 
@@ -41,17 +40,30 @@
     if ("POST".equalsIgnoreCase(request.getMethod()) && "attack".equals(request.getParameter("action")) && 전투시스템 != null) {
         String playerId = request.getParameter("playerId");
         
-        // 다이어그램 스펙 완전 일치: 오직 playerId만 넘기며 void 처리
-        전투시스템.몬스터공격(playerId);
+        boolean 성공여부 = false;
+        String 결과메시지 = "";
         
-        // 실행 후 내부 상태 값을 통해 성공/실패 여부를 판단할 수 있습니다.
-        // (만약 상세 데미지 화면 수치를 명확히 찍어주고 싶다면 기존의 전투.java 판정 로직 결과를 
-        //  UI 가독성을 위해 필드나 보조 함수로 읽어오도록 구성하면 됩니다.)
+        try {
+            // 다이어그램 스펙 완전 일치: 오직 playerId만 넘기며 void 처리
+            전투시스템.몬스터공격(playerId);
+            성공여부 = true;
+        } catch (IllegalArgumentException e) {
+            // [핵심]: 전투.java에서 던진 실패 메시지를 여기서 캐치하여 화면에 띄웁니다.
+            성공여부 = false;
+            결과메시지 = e.getMessage();
+        }
 %>
         <div class="result">
-            <h3>💥 공격 완료</h3>
-            <p><strong>발동 스킬:</strong> [<%= 나의캐릭터.get스킬명() %>]</p>
-            <p>컨트롤러 내부에서 몬스터 공격 연산 및 등급 판정이 완료되었습니다.</p>
+            <% if (성공여부) { %>
+                <h3>💥 공격 완료</h3>
+                <p><strong>발동 스킬:</strong> [<%= 나의캐릭터.get스킬명() %>]</p>
+                <p style="color:blue; font-weight:bold;">몬스터 공격 연산 및 등급 판정이 완료되었습니다!</p>
+                <br>
+                <a href="Add_Item_UI.jsp"><button>🎁 몬스터 처치! 아이템 획득하러 가기</button></a>
+            <% } else { %>
+                <h3>❌ 공격 실패</h3>
+                <p style="color:red; font-weight:bold;"><%= 결과메시지 %></p>
+            <% } %>
         </div>
 <%
     }
